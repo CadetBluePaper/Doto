@@ -63,12 +63,16 @@ class TaskManager:
         
 
     def remove_task(self, args):
-        target = self._find(args.name)
-        for t in self.tasks:
-            self.tasks.remove(target)
+        if args.index != None:
+            self.tasks.pop(int(args.index))
+            print(f"Removed task index {args.index}")
+        else:
+            target = self._find(args.name)
+            for t in self.tasks:
+                self.tasks.remove(target)
+            print(f"Removed {target.name}")
 
         save(self.filepath, self.tasks)
-        print(f"Removed {target.name}")
 
     def edit_task(self, args):
         target = self._find(args.target)
@@ -90,8 +94,13 @@ class TaskManager:
         save(self.filepath, self.tasks)
 
     def list_tasks(self, args):
+        print("# | name | start -> end | priority")
+        print("----------------------------------")
+        i = 0
         for t in self.tasks:
+            print(f"{i} |", end="")
             t.display()
+            i += 1
 
 def main():
 
@@ -108,7 +117,8 @@ def main():
     add_parser.set_defaults(func=manager.add_task)
 
     remove_parser = subparsers.add_parser("remove")
-    remove_parser.add_argument("name")
+    remove_parser.add_argument('-n', '--name')
+    remove_parser.add_argument('-i', '--index')
     remove_parser.set_defaults(func=manager.remove_task)
 
     edit_parser = subparsers.add_parser("set")

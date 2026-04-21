@@ -64,13 +64,19 @@ class TaskManager:
 
     def remove_task(self, args):
         if args.index != None:
-            self.tasks.pop(int(args.index))
-            print(f"Removed task index {args.index}")
-        else:
+            if int(args.index) >= 0 and int(args.index) <= len(self.tasks) - 1:
+                self.tasks.pop(int(args.index))
+                print(f"Removed task index {args.index}")
+            else:
+                print(f"Cant find task \'{args.index}\'")
+
+        elif args.name != None:
             target = self._find(args.name)
-            for t in self.tasks:
+            if target != None:
                 self.tasks.remove(target)
-            print(f"Removed {target.name}")
+                print(f"Removed {target.name}")
+            else: 
+                print(f"Cant find task named \"{args.name}\"")
 
         save(self.filepath, self.tasks)
 
@@ -95,7 +101,7 @@ class TaskManager:
 
     def list_tasks(self, args):
         print("# | name | start -> end | priority")
-        print("----------------------------------")
+        print("")
         i = 0
         for t in self.tasks:
             print(f"{i} |", end="")
@@ -106,7 +112,7 @@ def main():
 
     manager = TaskManager()
 
-    parser = argparse.ArgumentParser(prog="doto")
+    parser = argparse.ArgumentParser(prog="doto", description="")
     subparsers = parser.add_subparsers()
 
     add_parser = subparsers.add_parser("add")

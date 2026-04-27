@@ -1,0 +1,13 @@
+Screen {
+    layout: horizontal;
+}
+
+DataTable {
+    height: 100%
+}
+
+OptionList {
+    align: left top;
+    width: 20%;
+    height: 100%;
+}

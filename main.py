@@ -2,6 +2,7 @@
 import argparse
 import csv
 import os
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -9,7 +10,7 @@ def save(filepath: str, content: list):
     with open(filepath, "w", newline="") as f:
         writer = csv.writer(f)
         for t in content:
-            writer.writerow([t.name, t.start_date, t.end_date, t.priority])
+            writer.writerow([t.name, t.start_date, t.end_date, t.priority, t.status])
 
 def read(filepath: str) -> list[Task]:
     tasks = []
@@ -24,18 +25,20 @@ def read(filepath: str) -> list[Task]:
                     start_date=row[1] or None,
                     end_date=row[2] or None,
                     priority=row[3] or None,
+                    status=row[4] or None
                 ))
     return tasks
 
 @dataclass
 class Task:
     name: str
+    status: str = "Incomplete"
     start_date: Optional[str] = None
     end_date: Optional[str] = None
     priority: Optional[str] = None
 
     def display(self):
-        print(f" {self.name} | {self.start_date} -> {self.end_date} | {self.priority}")
+        print(f" {self.name} | {self.start_date} -> {self.end_date} | {self.priority} | {self.status}")
 
 class TaskManager:
 
@@ -95,11 +98,14 @@ class TaskManager:
         if target.priority != args.priority and args.priority != None:
             print(f"Set {target.name}'s priority to {args.priority}")
             target.priority = args.priority
+        if target.status != args.status and args.status != None:
+            print(f"Set {target.name}'s status to {args.status}")
+            target.status = args.status
             
 
         save(self.filepath, self.tasks)
 
-    def list_tasks(self, args):
+    def list_tasks(self, args) -> None:
         print("# | name | start -> end | priority")
         print("")
         i = 0
@@ -107,6 +113,14 @@ class TaskManager:
             print(f"{i} |", end="")
             t.display()
             i += 1
+
+    def start_tui(self, args) -> None:
+        from tui import start
+        start()
+
+def get_tasks() -> list["Task"]:
+    task_list = read(os.path.expanduser("~/Documents/Code_Projects/Doto/tasks.txt"))
+    return task_list
 
 def main():
 
@@ -133,11 +147,15 @@ def main():
     edit_parser.add_argument('-s', '--start', help="The start date of the task")
     edit_parser.add_argument('-e', '--end', help="The end date of the task")
     edit_parser.add_argument('-p', '--priority', help="The priority of the task (Low, Med, High)")
+    edit_parser.add_argument('-t', '--status', help="The status of the task (Incomplete, Doing, Complete)")
     edit_parser.set_defaults(func=manager.edit_task)
 
     list_parser = subparsers.add_parser("list", help="Lists the active tasks")
     list_parser.add_argument('-c', '--complete', type=bool, help="Marks a task as complete")
     list_parser.set_defaults(func=manager.list_tasks)
+
+    tui_parser = subparsers.add_parser("tui", help="Opens up the tui")
+    tui_parser.set_defaults(func=manager.start_tui)
 
     args = parser.parse_args()
     if hasattr(args, "func"):

@@ -2,7 +2,10 @@ from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header, OptionList, DataTable, Input
 from textual.message import Message
 from textual.widgets.option_list import Option
+
 from dataclasses import dataclass
+
+from main import get_tasks
 
 class Sections(OptionList):
 
@@ -13,20 +16,32 @@ class Sections(OptionList):
             Option("Complete", id="complete"),
         ])
 
-@dataclass
 class TaskData:
-    HEADER = ("Name", "Start", "End", "Prority")
-    INCOMPLETE =[
-        ["incomplete", "date", "date", "None"]
-    ]
-    DOING = [
-        ["doing", "date", "date", "None"]
-    ]
-    COMPLETE = [
-        ["complete", "date", "date", "None"]
-    ]
 
-    ##Add communtcation with backend here
+    def __init__(self):
+        self.task_list: list["Task"] = get_tasks()
+
+        self.HEADER: set(str)  = ("Name", "Start", "End", "Prority", "Status")
+
+        self.incomplete: list["Task"] = []
+        self.doing: list["Task"] = []
+        self.complete: list["Task"] = []
+
+        self.seperate_status()
+
+        
+    def seperate_status(self):
+        
+        for task in self.task_list:
+            if task.status == "Incomplete":
+                self.incomplete.append([task.name, task.start_date, task.end_date, task.priority, task.status])
+            elif task.status == "Doing":
+                self.doing.append([task.name, task.start_date, task.end_date, task.priority, task.status])
+            elif task.status == "Complete":
+                self.complete.append([task.name, task.start_date, task.end_date, task.priority, task.status])
+            else:
+                self.incomplete.append([task.name, task.start_date, task.end_date, task.priority, task.status])
+        
 
 
 class TaskManager(App):
@@ -68,7 +83,8 @@ class TaskManager(App):
         
         table.move_cursor(row=last_row_index, animate=True)
 
-        #commincate with backend
+        
+        #communcation with backend
 
     def action_delete_row(self) -> None:
         table = self.query_one(DataTable)
@@ -117,15 +133,15 @@ class TaskManager(App):
 
         new_rows = []
         if category_id == "incomplete":
-            new_rows = data.INCOMPLETE
+            new_rows = data.incomplete
         elif category_id == "doing":
-            new_rows = data.DOING
+            new_rows = data.doing
         elif category_id == "complete":
-            new_rows = data.COMPLETE
+            new_rows = data.complete
 
         table.add_rows(new_rows)
 
-
-if __name__ == "__main__":
+def start():
     app = TaskManager()
     app.run()
+    

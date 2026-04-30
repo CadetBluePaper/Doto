@@ -29,13 +29,17 @@ def read(filepath: str) -> list[Task]:
                 ))
     return tasks
 
+def get_tasks() -> list["Task"]:
+    task_list = read(os.path.expanduser("~/Documents/Code_Projects/Doto/tasks.txt"))
+    return task_list
+
 @dataclass
 class Task:
     name: str
     status: str = "Incomplete"
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
-    priority: Optional[str] = None
+    start_date: Optional[str] = "-"
+    end_date: Optional[str] = "-"
+    priority: Optional[str] = "-"
 
     def display(self):
         print(f" {self.name} | {self.start_date} -> {self.end_date} | {self.priority} | {self.status}")
@@ -118,9 +122,7 @@ class TaskManager:
         from tui import start
         start()
 
-def get_tasks() -> list["Task"]:
-    task_list = read(os.path.expanduser("~/Documents/Code_Projects/Doto/tasks.txt"))
-    return task_list
+
 
 def main():
 

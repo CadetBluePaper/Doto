@@ -6,7 +6,21 @@ import os
 from dataclasses import dataclass
 from typing import Optional
 
-TASKS_FILEPATH = os.path.expanduser("~/code-projects/Doto/tasks.txt")
+CONFIG_FILE = os.path.expanduser("~/.config/doto")
+
+def load_config() -> str:
+    default = os.path.expanduser("~/Doto/tasks.txt")
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            saved = f.read().strip()
+            return saved if saved else default
+    return default
+
+def save_config(path: str) -> None:
+    with open(CONFIG_FILE, "w") as f:
+        f.write(path)
+
+tasks_filepath = load_config()
 
 @dataclass
 class Task:
@@ -18,7 +32,6 @@ class Task:
     priority: Optional[str] = None
 
     def display(self):
-
         start = self.start_date or "-"
         end = self.end_date or "-"
         priority = self.priority or "-"
@@ -27,7 +40,7 @@ class Task:
 class TaskManager:
 
     def __init__(self):
-        self.tasks: list[Task] = read(TASKS_FILEPATH)
+        self.tasks: list[Task] = read(tasks_filepath)
 
     def _find(self, name) -> Optional[Task]:
         for t in self.tasks:
@@ -43,7 +56,7 @@ class TaskManager:
             priority=args.priority
         )
         self.tasks.append(task)
-        save(TASKS_FILEPATH, self.tasks)
+        save(tasks_filepath, self.tasks)
         print(f"Added Task \"{task.name}\"")
 
     def remove_task(self, args):
@@ -63,7 +76,7 @@ class TaskManager:
             else:
                 print(f"Can't find task named \"{args.name}\"")
 
-        save(TASKS_FILEPATH, self.tasks)
+        save(tasks_filepath, self.tasks)
 
     def edit_task(self, args):
         target = self._find(args.target)
@@ -88,7 +101,7 @@ class TaskManager:
             print(f"Set {target.name}'s status to {args.status}")
             target.status = args.status
 
-        save(TASKS_FILEPATH, self.tasks)
+        save(tasks_filepath, self.tasks)
 
     def list_tasks(self, args) -> None:
         print("# | name | start -> end | priority | status\n")
@@ -124,7 +137,13 @@ def read(filepath: str) -> list[Task]:
     return tasks
 
 def get_tasks() -> list[Task]:
-    return read(TASKS_FILEPATH)
+    return read(tasks_filepath)
+
+def change_path(args) -> None:
+    global tasks_filepath
+    tasks_filepath = os.path.expanduser(args.path) 
+    save_config(tasks_filepath)
+    print(f"Task file path set to: {tasks_filepath}")
 
 def main():
     manager = TaskManager()
@@ -162,6 +181,10 @@ def main():
 
     tui_parser = subparsers.add_parser("tui", help="Opens up the tui")
     tui_parser.set_defaults(func=manager.start_tui)
+
+    set_filepath = subparsers.add_parser("path", help="Sets the path for task list")
+    set_filepath.add_argument("path", help="The task file path")
+    set_filepath.set_defaults(func=change_path)
 
     args = parser.parse_args()
     if hasattr(args, "func"):

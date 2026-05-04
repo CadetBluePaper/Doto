@@ -143,3 +143,5 @@ name, start_date, end_date, priority, status
 The default location is `~/Doto/tasks.txt`.
 
 ---
+
+Thanks for using my stuff :)

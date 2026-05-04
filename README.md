@@ -7,7 +7,7 @@ A lightweight, terminal-based todo manager.
 ```bash
 git clone https://github.com/yourname/Doto.git
 cd Doto
-pip install -r requirements.txt
+pip install -r textual
 ```
 
 Make `doto` available globally (optional):
